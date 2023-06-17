@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #data-table {
+      font-family: Arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    #data-table th,
+    #data-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #data-table th {
+      cursor: pointer;
+      background-color: #f2f2f2;
+    }
+
+    #data-table th:hover {
+      background-color: #ddd;
+    }
+
+    #data-table tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th onclick="sortTable('id')">ID</th>
+        <th onclick="sortTable('name')">Name</th>
+        <th onclick="sortTable('birthday')">Birthday</th>
+        <th onclick="sortTable('bust')">Bust</th>
+        <th onclick="sortTable('waist')">Waist</th>
+        <th onclick="sortTable('hip')">Hip</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    fetch('database.json')
+      .then(response => response.json())
+      .then(data => {
+        const filteredData = data.filter(record => Object.values(record).every(value => value !== null));
+
+        filteredData.sort((record1, record2) => {
+          const birthday1 = new Date(record1.birthday);
+          const birthday2 = new Date(record2.birthday);
+          return birthday2.getTime() - birthday1.getTime();
+        });
+
+        const tableBody = document.querySelector('#data-table tbody');
+
+        filteredData.forEach(record => {
+          const row = document.createElement('tr');
+          const idCol = document.createElement('td');
+          const nameCol = document.createElement('td');
+          const birthdayCol = document.createElement('td');
+          const bustCol = document.createElement('td');
+          const waistCol = document.createElement('td');
+          const hipCol = document.createElement('td');
+
+          idCol.textContent = record.id;
+          nameCol.textContent = record.name;
+          birthdayCol.textContent = record.birthday;
+          bustCol.textContent = record.bust;
+          waistCol.textContent = record.waist;
+          hipCol.textContent = record.hip;
+
+          row.appendChild(idCol);
+          row.appendChild(nameCol);
+          row.appendChild(birthdayCol);
+          row.appendChild(bustCol);
+          row.appendChild(waistCol);
+          row.appendChild(hipCol);
+
+          tableBody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    function sortTable(column) {
+      const table = document.querySelector('#data-table');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      rows.sort((row1, row2) => {
+        const value1 = row1.querySelector(`td:nth-of-type(${getColumnIndex(column)})`).textContent;
+        const value2 = row2.querySelector(`td:nth-of-type(${getColumnIndex(column)})`).textContent;
+
+        if (column === 'birthday') {
+          return new Date(value2).getTime() - new Date(value1).getTime();
+        } else {
+          return value1.localeCompare(value2);
+        }
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function getColumnIndex(column) {
+      switch (column) {
+        case 'id':
+          return 1;
+        case 'name':
+          return 2;
+        case 'birthday':
+          return 3;
+        case 'bust':
+          return 4;
+        case 'waist':
+          return 5;
+        case 'hip':
+          return 6;
+        default:
+          return 0;
+      }
+    }
+
+  </script>
+</body>
+
+</html>
